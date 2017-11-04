@@ -16,6 +16,26 @@ def assign_value(values, box, value):
         assignments.append(values.copy())
     return values
 
+def naked_twins_in_unit(values, unit):
+    """Find naked twins in a given unit.
+    Args:
+        values(dict): a dictionary of the form {'box_name': '123456789', ...}
+        unit(list): a unit specification
+    Returns:
+        the set of all naked twins.
+    """
+    naked = set() # Digits that are naked twins
+    seen  = set() # Values we've seen in this unit
+    for box in unit:
+        value = values[box]
+        if len(value) != 2: continue
+        if value in seen:
+            naked |= set(value)
+        else:
+            seen.add(value)
+    return naked
+
+
 def naked_twins(values):
     """Eliminate values using the naked twins strategy.
     Args:
@@ -25,23 +45,9 @@ def naked_twins(values):
         the values dictionary with the naked twins eliminated from peers.
     """
 
-    units_naked_twins = [] # Sets of naked twins
-    
     # Find all instances of naked twins
-    for unit in unitlist:
-        naked = set() # Digits that are naked twins
-        seen = [] # Sets we've seen in this unit
-        for box in unit:
-            value = set(values[box])
-            if len(value) != 2: continue
-            if value in seen:
-                naked |= value
-            else:
-                seen += [value]
-        units_naked_twins += [(unit, naked)]
-
-    # Eliminate the naked twins as possibilities for their peers
-    for unit, naked in units_naked_twins:
+    for unit, naked in [(unit, naked_twins_in_unit(values, unit)) for unit in unitlist]:
+        # Eliminate the naked twins as possibilities for their peers
         for box in unit:
             value = values[box]
             new_value_set = set(value) - naked
