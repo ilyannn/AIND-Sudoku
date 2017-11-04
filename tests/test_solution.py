@@ -94,5 +94,11 @@ class TestDiagonalSudoku(unittest.TestCase):
     def test_solve(self):
         self.assertEqual(solution.solve(self.diagonal_grid), self.solved_diag_sudoku)
 
+class TestImpossibleSudoku(unittest.TestCase):
+    impossible_grid = '2..2..........62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
+
+    def test_solve(self):
+        self.assertEqual(solution.solve(self.impossible_grid), False)
+
 if __name__ == '__main__':
     unittest.main()

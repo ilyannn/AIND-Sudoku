@@ -16,25 +16,6 @@ def assign_value(values, box, value):
         assignments.append(values.copy())
     return values
 
-def naked_twins_in_unit(values, unit):
-    """Find naked twins in a given unit.
-    Args:
-        values(dict): a dictionary of the form {'box_name': '123456789', ...}
-        unit(list): a unit specification
-    Returns:
-        the set of all naked twins.
-    """
-    naked = set() # Digits that are naked twins
-    seen  = set() # Values we've seen in this unit
-    for box in unit:
-        value = values[box]
-        if len(value) != 2: continue
-        if value in seen:
-            naked |= set(value)
-        else:
-            seen.add(value)
-    return naked
-
 
 def naked_twins(values):
     """Eliminate values using the naked twins strategy.
@@ -44,15 +25,37 @@ def naked_twins(values):
     Returns:
         the values dictionary with the naked twins eliminated from peers.
     """
+    
+    def naked_twins_in_unit(unit):
+        """Find naked twins in a given unit.
+        Args:
+            values(dict): a dictionary of the form {'box_name': '123456789', ...}
+            unit(list): a unit specification
+        Returns:
+            the set of all naked twins in this unit.
+        """
+        naked = set() # Digits that are naked twins
+        seen  = set() # Values we've seen in this unit
+        for box in unit:
+            value = values[box]
+            if len(value) != 2:
+                continue
+            if value in seen:
+                naked |= set(value)
+            else:
+                seen.add(value)
 
-    # Find all instances of naked twins
-    for unit, naked in [(unit, naked_twins_in_unit(values, unit)) for unit in unitlist]:
+        return naked
+
+    for unit in unitlist:
+        # Find all instances of naked twins
+        naked = naked_twins_in_unit(unit)
         # Eliminate the naked twins as possibilities for their peers
         for box in unit:
             value = values[box]
-            new_value_set = set(value) - naked
-            if len(new_value_set) > 0:
-                assign_value(values, box, ''.join(sorted(new_value_set)))
+            new_value = ''.join(sorted(set(value) - naked))
+            if new_value not in ['', value]:
+                assign_value(values, box, new_value)
 
     return values
 
