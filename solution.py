@@ -25,9 +25,30 @@ def naked_twins(values):
         the values dictionary with the naked twins eliminated from peers.
     """
 
+    units_naked_twins = [] # Sets of naked twins
+    
     # Find all instances of naked twins
-    # Eliminate the naked twins as possibilities for their peers
+    for unit in unitlist:
+        naked = set() # Digits that are naked twins
+        seen = [] # Sets we've seen in this unit
+        for box in unit:
+            value = set(values[box])
+            if len(value) != 2: continue
+            if value in seen:
+                naked |= value
+            else:
+                seen += [value]
+        units_naked_twins += [(unit, naked)]
 
+    # Eliminate the naked twins as possibilities for their peers
+    for unit, naked in units_naked_twins:
+        for box in unit:
+            value = values[box]
+            new_value_set = set(value) - naked
+            if len(new_value_set) > 0:
+                assign_value(values, box, ''.join(sorted(new_value_set)))
+
+    return values
 
 def cross(A, B):
     "Cross product of elements in A and elements in B."
