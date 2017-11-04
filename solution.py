@@ -155,8 +155,8 @@ def reduce_puzzle(values):
         # Check how many steps are left.
         choices_before = total_choices(values)
         
-        # Use the Eliminate Strategy. Use the Only Choice Strategy.
-        values = eliminate(only_choice(values))
+        # Use the strategies.
+        values = naked_twins(eliminate(only_choice(values)))
 
         # If we are not getting closer, stop now.
         if choices_before == total_choices(values):
