@@ -126,6 +126,13 @@ def naked_twins(values):
 # Main Solution
 
 def eliminate(values):
+    """Reduce the board by removing values that are already known to be in other boxes.
+    Args:
+        values(dict): a dictionary of the form {'box_name': '123456789', ...}
+
+    Returns:
+        the values dictionary with the solved values eliminated from peers.
+    """
     for (box, value) in values.copy().items():
         if len(value) == 1:
             for another in peers[box]:
@@ -135,6 +142,13 @@ def eliminate(values):
 
 
 def only_choice(values):
+    """Reduce the board by setting values that can only be present in one box.
+    Args:
+        values(dict): a dictionary of the form {'box_name': '123456789', ...}
+
+    Returns:
+        the values dictionary with the only choices eliminated from peers.
+    """
     for unit in unitlist:
         count = {}
         for peer in unit:
@@ -174,6 +188,7 @@ def reduce_puzzle(values):
         values = naked_twins(eliminate(only_choice(values)))
 
         # If we are not getting closer, stop now.
+        # total_choices is a better function then just counting the number of solved boxes
         if choices_before == total_choices(values):
             return values
 
