@@ -1,3 +1,33 @@
+# Basic Definitions
+
+def cross(A, B):
+    "Cross product of elements in A and elements in B."
+    return [a + b for a in A for b in B]
+
+
+rows = 'ABCDEFGHI'
+cols = '123456789'
+boxes = cross(rows, cols)
+
+row_units = [cross(r, cols) for r in rows]
+column_units = [cross(rows, c) for c in cols]
+square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
+
+
+def diagonal(columns):
+    "Diagonal with rows and different column order."
+    return [a + b for a, b in zip(rows, columns)]
+
+diag_units = [diagonal(cols), diagonal(reversed(cols))] # Add diagonal units
+unitlist = row_units + column_units + square_units + diag_units
+
+units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
+peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)
+
+
+
+# Some Helpers
+
 assignments = []
 
 
@@ -16,6 +46,38 @@ def assign_value(values, box, value):
         assignments.append(values.copy())
     return values
 
+
+def grid_values(grid):
+    """
+        Convert grid into a dict of {square: char} with '123456789' for empties.
+        Args:
+        grid(string) - A grid in string form.
+        Returns:
+        A grid in dictionary form
+        Keys: The boxes, e.g., 'A1'
+        Values: The value in each box, e.g., '8'. If the box has no value, then the value will be '123456789'.
+        """
+    return dict([(a, '123456789' if b == '.' else b) for a, b in zip(boxes, grid)])
+
+
+def display(values):
+    """
+        Display the values as a 2-D grid.
+        Args:
+        values(dict): The sudoku in dictionary form
+        """
+    # Copied from the utils.py
+    width = 1+max(len(values[s]) for s in boxes)
+    line = '+'.join(['-'*(width*3)]*3)
+    for r in rows:
+        print(''.join(values[r+c].center(width)+('|' if c in '36' else '')
+                      for c in cols))
+        if r in 'CF': print(line)
+    return
+
+
+
+# Naked Twins
 
 def naked_twins(values):
     """Eliminate values using the naked twins strategy.
@@ -59,59 +121,9 @@ def naked_twins(values):
 
     return values
 
-def cross(A, B):
-    "Cross product of elements in A and elements in B."
-    return [a + b for a in A for b in B]
-
-# Basic definitions
-rows = 'ABCDEFGHI'
-cols = '123456789'
-boxes = cross(rows, cols)
-
-row_units = [cross(r, cols) for r in rows]
-column_units = [cross(rows, c) for c in cols]
-square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
-
-# Add diagonal units
-def diagonal(columns):
-    "Diagonal with rows and different column order."
-    return [a + b for a, b in zip(rows, columns)]
-
-diag_units = [diagonal(cols), diagonal(reversed(cols))]
-unitlist = row_units + column_units + square_units + diag_units
-
-units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
-peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)
 
 
-def grid_values(grid):
-    """
-    Convert grid into a dict of {square: char} with '123456789' for empties.
-    Args:
-        grid(string) - A grid in string form.
-    Returns:
-        A grid in dictionary form
-            Keys: The boxes, e.g., 'A1'
-            Values: The value in each box, e.g., '8'. If the box has no value, then the value will be '123456789'.
-    """
-    return dict([(a, '123456789' if b == '.' else b) for a, b in zip(boxes, grid)])
-
-
-def display(values):
-    """
-    Display the values as a 2-D grid.
-    Args:
-        values(dict): The sudoku in dictionary form
-    """
-    # Copied from the utils.py
-    width = 1+max(len(values[s]) for s in boxes)
-    line = '+'.join(['-'*(width*3)]*3)
-    for r in rows:
-        print(''.join(values[r+c].center(width)+('|' if c in '36' else '')
-                      for c in cols))
-        if r in 'CF': print(line)
-    return
-
+# Main Solution
 
 def eliminate(values):
     for (box, value) in values.copy().items():
@@ -167,6 +179,7 @@ def reduce_puzzle(values):
 
     return False
 
+
 def search(values):
     "Using depth-first search and propagation, create a search tree and solve the sudoku."
     # First, reduce the puzzle using the previous function
@@ -206,6 +219,10 @@ def solve(grid):
     values = grid_values(grid)
     #    display(values)
     return search(values)
+
+
+
+# An Example
 
 if __name__ == '__main__':
     diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
